@@ -246,3 +246,41 @@ def find_non_zero_labels_mask(segmentation_map, th_percent, crop_size, crop):
         return True
     else:
         return False
+
+
+def create_oct_sub_volumes(
+        list_oct_3D_scans,
+        list_oct_2D_labes,
+        mode,
+        samples_per_scan,
+        crop_size,
+        full_vol_dim,
+        sub_vol_path
+    ):
+    
+    total_scans = len(list_oct_3D_scans)
+    list = []
+
+    print('Mode: ' + mode + ' Subvolume samples to generate: ', total_scans*samples_per_scan, ' Volumes: ', total_scans)
+    for scan_idx in range(total_scans):
+        scan_3D, label = img_loader.load_oct_scans(
+            list_oct_3D_scans[scan_idx],
+            list_oct_2D_labes[scan_idx]
+        )
+        for sample_idx in range(samples_per_scan):
+            crop = find_random_crop_dim(full_vol_dim,crop_size)
+            img_tensor = img_loader.crop_img(scan_3D, crop_size, crop)
+            label_tensor = img_loader.crop_img(
+                label, 
+                (1,crop_size[1],crop_size[2]), 
+                (1,crop[1],crop[2])
+            )
+
+            filename = sub_vol_path + 'id_' + str(scan_idx) + '_s_' + str(sample_idx)
+            f_t1 = filename + '.npy'
+            np.save(f_t1, img_tensor)
+            f_seg = filename + 'seg.npy'
+            np.save(f_seg, label_tensor)
+            list.append((f_t1, f_seg))
+
+    return list

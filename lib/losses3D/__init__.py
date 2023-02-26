@@ -12,13 +12,13 @@ from .dice import DiceLoss
 from .tags_angular_loss import TagsAngularLoss
 from .weight_smooth_l1 import WeightedSmoothL1Loss
 from .ContrastiveLoss import ContrastiveLoss
-
+from .OCT2D_binary_cross_entropy_with_logits import OCT2DBinaryCrossEntropyWithLogitsLoss
 from .Dice2D import DiceLoss2D
 
 
 SUPPORTED_LOSSES = ['BCEWithLogitsLoss', 'BCEDiceLoss', 'CrossEntropyLoss', 'WeightedCrossEntropyLoss',
                     'PixelWiseCrossEntropyLoss', 'GeneralizedDiceLoss', 'DiceLoss', 'TagsAngularLoss', 'MSELoss',
-                    'SmoothL1Loss', 'L1Loss', 'WeightedSmoothL1Loss']
+                    'SmoothL1Loss', 'L1Loss', 'WeightedSmoothL1Loss', 'OCT2DBinaryCrossEntropyWithLogitsLoss']
 
 
 def create_loss(name, weight=None, ignore_index=None, pos_weight=None):
@@ -51,6 +51,8 @@ def create_loss(name, weight=None, ignore_index=None, pos_weight=None):
         return L1Loss()
     elif name == 'WeightedSmoothL1Loss':
         return WeightedSmoothL1Loss()
+    elif name == 'OCT2DBinaryCrossEntropyWithLogitsLoss':
+        return OCT2DBinaryCrossEntropyWithLogitsLoss()
     else:
         raise RuntimeError(f"Unsupported loss function: '{name}'. Supported losses: {SUPPORTED_LOSSES}")
 
