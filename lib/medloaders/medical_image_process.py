@@ -208,14 +208,7 @@ def percentile_clip(img_numpy, min_val=0.1, max_val=99.8):
 
 
 def load_oct_scans(list_oct_3D_scan, list_oct_2D_label):
-    scan_3D = []
-    for oct_2D_scan in list_oct_3D_scan:
-        scan_file = Image.open(oct_2D_scan)
-        scan_file = to_tensor(scan_file)
-        scan_3D.append(scan_file)
-
-    scan_3D = torch.stack(scan_3D, dim=2)
-    scan_3D = scan_3D.squeeze()
+    scan_3D = torch.load(list_oct_3D_scan)
 
     label = Image.open(list_oct_2D_label)
     label = to_tensor(label)
