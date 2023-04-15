@@ -14,7 +14,8 @@ dict_class_names = {"iseg2017": ["Air", "CSF", "GM", "WM"],
                     "brats2020": ["Background", "NCR/NET", "ED", "ET"],
                     "covid_seg": ["c1", "c2", "c3"],
                     "miccai2019": ["c1", "c2", "c3", "c4", "c5", "c6", "c7"],
-                    "MMS3D": ["Background"]
+                    "MMS3D": ["Background"],
+                    "MMS3D_labels3D": ["Background"]
                     }
 
 

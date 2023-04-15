@@ -284,3 +284,37 @@ def create_oct_sub_volumes(
             list.append((f_t1, f_seg))
 
     return list
+
+
+def create_oct_sub_volumes_labels_3D(
+        list_oct_3D_scans,
+        list_oct_3D_labes,
+        mode,
+        samples_per_scan,
+        crop_size,
+        full_vol_dim,
+        sub_vol_path
+    ):
+    
+    total_scans = len(list_oct_3D_scans)
+    list = []
+
+    print('Mode: ' + mode + ' Subvolume samples to generate: ', total_scans*samples_per_scan, ' Volumes: ', total_scans)
+    for scan_idx in range(total_scans):
+        scan_3D, label = img_loader.load_oct_scans_labels_3D(
+            list_oct_3D_scans[scan_idx],
+            list_oct_3D_labes[scan_idx]
+        )
+        for sample_idx in range(samples_per_scan):
+            crop = find_random_crop_dim(full_vol_dim,crop_size)
+            label_tensor = img_loader.crop_img(label, crop_size, crop)
+            img_tensor = img_loader.crop_img(scan_3D, crop_size, crop)
+
+            filename = sub_vol_path + 'id_' + str(scan_idx) + '_s_' + str(sample_idx)
+            f_t1 = filename + '.npy'
+            np.save(f_t1, img_tensor)
+            f_seg = filename + 'seg.npy'
+            np.save(f_seg, label_tensor)
+            list.append((f_t1, f_seg))
+
+    return list

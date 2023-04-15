@@ -214,3 +214,28 @@ def load_oct_scans(list_oct_3D_scan, list_oct_2D_label):
     label = to_tensor(label)
 
     return scan_3D, label
+
+
+def load_oct_scans_labels_3D(list_oct_3D_scan, list_oct_3D_label):
+    scan_3D = Image.open(list_oct_3D_scan)
+    scan_3D_ar = []
+
+    for i in range(scan_3D.n_frames):
+        scan_3D.seek(i)
+        scan_3D_ar.append(np.asarray(scan_3D, dtype=np.float32))
+    scan_3D_ar = np.stack(scan_3D_ar)
+
+    scan_3D = to_tensor(scan_3D_ar)
+
+
+    label = Image.open(list_oct_3D_label)
+    label_ar = []
+
+    for i in range(label.n_frames):
+        label.seek(i)
+        label_ar.append(np.asarray(label))
+    label_ar = np.stack(label_ar)
+
+    label = to_tensor(label_ar)
+
+    return scan_3D, label

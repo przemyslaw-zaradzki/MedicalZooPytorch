@@ -14,11 +14,11 @@ from .weight_smooth_l1 import WeightedSmoothL1Loss
 from .ContrastiveLoss import ContrastiveLoss
 from .OCT2D_binary_cross_entropy_with_logits import OCT2DBinaryCrossEntropyWithLogitsLoss
 from .Dice2D import DiceLoss2D
-
+from .OCT2D_binary_cross_entropy_with_logits_no_maxpool import OCT2DBinaryCrossEntropyWithLogitsLossNoMaxPool
 
 SUPPORTED_LOSSES = ['BCEWithLogitsLoss', 'BCEDiceLoss', 'CrossEntropyLoss', 'WeightedCrossEntropyLoss',
                     'PixelWiseCrossEntropyLoss', 'GeneralizedDiceLoss', 'DiceLoss', 'TagsAngularLoss', 'MSELoss',
-                    'SmoothL1Loss', 'L1Loss', 'WeightedSmoothL1Loss', 'OCT2DBinaryCrossEntropyWithLogitsLoss']
+                    'SmoothL1Loss', 'L1Loss', 'WeightedSmoothL1Loss', 'OCT2DBinaryCrossEntropyWithLogitsLoss', 'OCT2DBinaryCrossEntropyWithLogitsLossNoMaxPool']
 
 
 def create_loss(name, weight=None, ignore_index=None, pos_weight=None):
@@ -53,6 +53,8 @@ def create_loss(name, weight=None, ignore_index=None, pos_weight=None):
         return WeightedSmoothL1Loss()
     elif name == 'OCT2DBinaryCrossEntropyWithLogitsLoss':
         return OCT2DBinaryCrossEntropyWithLogitsLoss()
+    elif name == 'OCT2DBinaryCrossEntropyWithLogitsLossNoMaxPool':
+        return OCT2DBinaryCrossEntropyWithLogitsLossNoMaxPool()
     else:
         raise RuntimeError(f"Unsupported loss function: '{name}'. Supported losses: {SUPPORTED_LOSSES}")
 
