@@ -1,6 +1,7 @@
 from lib.medloaders import medical_image_process as img_loader
 from lib.visual3D_temp import *
-
+from PIL import Image
+from torchvision.transforms.functional import to_tensor
 
 def get_viz_set(*ls, dataset_name, test_subject=0, save=False, sub_vol_path=None):
     """
@@ -246,9 +247,179 @@ def find_non_zero_labels_mask(segmentation_map, th_percent, crop_size, crop):
         return True
     else:
         return False
+    
 
 
-def create_oct_sub_volumes(
+def create_oct_sub_volumes_crop_dict_mem_alloc_generator(
+        list_oct_3D_scans,
+        list_oct_2D_labes,
+        mode,
+        samples_per_scan,
+        crop_size,
+        full_vol_dim,
+        sub_vol_path,
+        epochs
+    ):
+    
+    total_scans = len(list_oct_3D_scans)
+    dataset_file = torch.empty((total_scans, 640, 385, 385))
+    labels_file = torch.empty((total_scans, 1, 385, 385))
+
+    print('Mode: ' + mode + ' Subvolume samples to generate: ', total_scans*samples_per_scan, ' Volumes: ', total_scans)
+    for idx, (oct_3D_scan_path, oct_2D_label_path) in enumerate(zip(list_oct_3D_scans, list_oct_2D_labes)):
+        dataset_file[idx] = torch.load(oct_3D_scan_path)
+        labels_file[idx] = to_tensor(Image.open(oct_2D_label_path))
+
+    crop_dict = {}
+    _epochs = []
+    for epoch in range(epochs):
+        samples = []
+        for idx, (oct_3D_scan_path, oct_2D_label_path) in enumerate(zip(list_oct_3D_scans, list_oct_2D_labes)):
+            crop_idx_list = []
+            for sample_idx in range(samples_per_scan):
+                crop = find_random_crop_dim(full_vol_dim,crop_size)
+                crop_idx_list.append(crop)
+            samples.append({
+                "oct_3D_scan_path" : oct_3D_scan_path, 
+                "oct_2D_label_path" : oct_2D_label_path, 
+                "crop_idx_list" : crop_idx_list
+            })
+        _epochs.append({
+            "samples" : samples
+        })
+
+    crop_dict["epochs"] = _epochs
+
+    return dataset_file, labels_file, crop_dict
+
+
+def create_oct_sub_volumes_crop_dict_mem_alloc(
+        list_oct_3D_scans,
+        list_oct_2D_labes,
+        mode,
+        samples_per_scan,
+        crop_size,
+        full_vol_dim,
+        sub_vol_path
+    ):
+    
+    total_scans = len(list_oct_3D_scans)
+    dataset_file = torch.empty((total_scans, 640, 385, 385))
+    labels_file = torch.empty((total_scans, 1, 385, 385))
+    crop_dict = {}
+    samples = []
+
+    print('Mode: ' + mode + ' Subvolume samples to generate: ', total_scans*samples_per_scan, ' Volumes: ', total_scans)
+    for idx, (oct_3D_scan_path, oct_2D_label_path) in enumerate(zip(list_oct_3D_scans, list_oct_2D_labes)):
+        dataset_file[idx] = torch.load(oct_3D_scan_path)
+        labels_file[idx] = to_tensor(Image.open(oct_2D_label_path))
+
+        crop_idx_list = []
+        for sample_idx in range(samples_per_scan):
+            crop = find_random_crop_dim(full_vol_dim,crop_size)
+            crop_idx_list.append(crop)
+
+        samples.append({
+            "oct_3D_scan_path" : oct_3D_scan_path, 
+            "oct_2D_label_path" : oct_2D_label_path, 
+            "crop_idx_list" : crop_idx_list
+        })
+
+    crop_dict["samples"] = samples
+
+    return dataset_file, labels_file, crop_dict
+
+
+def create_oct_sub_volumes_crop_dict(
+        list_oct_3D_scans,
+        list_oct_2D_labes,
+        mode,
+        samples_per_scan,
+        crop_size,
+        full_vol_dim,
+        sub_vol_path
+    ):
+    
+    dataset_file = []
+    labels_file =[]   
+    crop_dict = {}
+    samples = []
+    total_scans = len(list_oct_3D_scans)
+
+    print('Mode: ' + mode + ' Subvolume samples to generate: ', total_scans*samples_per_scan, ' Volumes: ', total_scans)
+    for oct_3D_scan_path, oct_2D_label_path in zip(list_oct_3D_scans, list_oct_2D_labes):
+        scan_3D, label = img_loader.load_oct_scans(
+            oct_3D_scan_path,
+            oct_2D_label_path
+        )
+        crop_idx_list = []
+        for sample_idx in range(samples_per_scan):
+            crop = find_random_crop_dim(full_vol_dim,crop_size)
+            crop_idx_list.append(crop)
+
+        samples.append({
+            "oct_3D_scan_path" : oct_3D_scan_path, 
+            "oct_2D_label_path" : oct_2D_label_path, 
+            "crop_idx_list" : crop_idx_list
+        })
+
+        dataset_file.append(scan_3D)
+        labels_file.append(label)
+
+    dataset_file = torch.stack(dataset_file, axis=0)
+    labels_file = torch.stack(labels_file, axis=0)
+    crop_dict["samples"] = samples
+
+    return dataset_file, labels_file, crop_dict
+
+
+def create_oct_sub_volumes_one_file(
+        list_oct_3D_scans,
+        list_oct_2D_labes,
+        mode,
+        samples_per_scan,
+        crop_size,
+        full_vol_dim,
+        sub_vol_path
+    ):
+    
+    total_scans = len(list_oct_3D_scans)
+    list = []
+
+    dataset_file = []
+    labels_file =[]    
+
+    print('Mode: ' + mode + ' Subvolume samples to generate: ', total_scans*samples_per_scan, ' Volumes: ', total_scans)
+    for scan_idx in range(total_scans):
+        scan_3D, label = img_loader.load_oct_scans(
+            list_oct_3D_scans[scan_idx],
+            list_oct_2D_labes[scan_idx]
+        )
+        for sample_idx in range(samples_per_scan):
+            crop = find_random_crop_dim(full_vol_dim,crop_size)
+            img_tensor = img_loader.crop_img(scan_3D, crop_size, crop)
+            label_tensor = img_loader.crop_img(
+                label, 
+                (1,crop_size[1],crop_size[2]), 
+                (1,crop[1],crop[2])
+            )
+
+            dataset_file.append(img_tensor)
+            labels_file.append(label_tensor)
+
+    dataset_file = np.stack(dataset_file, axis=0)
+    labels_file = np.stack(labels_file, axis=0)
+
+    f_t1 = f"{sub_vol_path}_dataset.npy"
+    np.save(f_t1, dataset_file)
+    f_seg = f"{sub_vol_path}_seg.npy"
+    np.save(f_seg, labels_file)
+    list.append((f_t1, f_seg))
+
+    return list
+
+
+def create_oct_sub_volumes_many_files(
         list_oct_3D_scans,
         list_oct_2D_labes,
         mode,

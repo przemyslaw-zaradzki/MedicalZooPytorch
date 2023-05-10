@@ -25,14 +25,16 @@ def create_model(args):
     in_channels = args.inChannels
     num_classes = args.classes
     weight_decay = 0.0000000001
+    base_n_filter = args.base_n_filter
     print("Building Model . . . . . . . ." + model_name)
+    print("base_n_filter: ", base_n_filter)
 
     if model_name == 'VNET2':
         model = VNetLight(in_channels=in_channels, elu=False, classes=num_classes)
     elif model_name == 'VNET':
         model = VNet(in_channels=in_channels, elu=False, classes=num_classes)
     elif model_name == 'UNET3D':
-        model = UNet3D(in_channels=in_channels, n_classes=num_classes, base_n_filter=8)
+        model = UNet3D(in_channels=in_channels, n_classes=num_classes, base_n_filter=base_n_filter)
     elif model_name == 'DENSENET1':
         model = SinglePathDenseNet(in_channels=in_channels, classes=num_classes)
     elif model_name == 'DENSENET2':

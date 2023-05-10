@@ -83,7 +83,7 @@ def prepare_input(input_tuple, inModalities=-1, inChannels=-1, cuda=False, args=
     elif modalities == 1:
         input_tensor, target = input_tuple
         if args.split_last_dim:     
-            input_tensor = input_tensor.reshape((-1,1,32,32,32)) 
+            input_tensor = input_tensor.reshape((-1,1,args.split_dim,args.split_dim,args.split_dim)) 
 
     if in_cuda:
         input_tensor, target = input_tensor.cuda(), target.cuda()

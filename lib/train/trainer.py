@@ -52,8 +52,10 @@ class Trainer:
     def train_epoch(self, epoch):
         self.model.train()
 
+        self.train_data_loader.dataset.epoch = epoch
+        print("self.train_data_loader.dataset.epoch", self.train_data_loader.dataset.epoch)
         for batch_idx, input_tuple in enumerate(self.train_data_loader):
-
+    
             self.optimizer.zero_grad()
 
             input_tensor, target = prepare_input(input_tuple=input_tuple, args=self.args)

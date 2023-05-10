@@ -16,6 +16,7 @@ from .OCT2D_binary_cross_entropy_with_logits import OCT2DBinaryCrossEntropyWithL
 from .Dice2D import DiceLoss2D
 from .OCT2D_binary_cross_entropy_with_logits_no_maxpool import OCT2DBinaryCrossEntropyWithLogitsLossNoMaxPool
 
+
 SUPPORTED_LOSSES = ['BCEWithLogitsLoss', 'BCEDiceLoss', 'CrossEntropyLoss', 'WeightedCrossEntropyLoss',
                     'PixelWiseCrossEntropyLoss', 'GeneralizedDiceLoss', 'DiceLoss', 'TagsAngularLoss', 'MSELoss',
                     'SmoothL1Loss', 'L1Loss', 'WeightedSmoothL1Loss', 'OCT2DBinaryCrossEntropyWithLogitsLoss', 'OCT2DBinaryCrossEntropyWithLogitsLossNoMaxPool']
