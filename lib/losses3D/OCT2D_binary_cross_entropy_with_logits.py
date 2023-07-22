@@ -12,10 +12,29 @@ class OCT2DBinaryCrossEntropyWithLogitsLoss(torch.nn.Module):
         self.path_size = path_size
         self.bs = bs
         self.max_pool = AdaptiveMaxPool3d((1,path_size,path_size))
-
+        
     def forward(self, input, target):
-        loss = torch.nn.functional.binary_cross_entropy_with_logits(
-            self.max_pool(input.reshape((self.bs,-1,self.path_size,self.path_size))), 
-            target
-        )
+        if type(input) is tuple:
+            if len(input) == 2:
+                # DENSEVOXELNET
+                loss1 = torch.nn.functional.binary_cross_entropy_with_logits(
+                    self.max_pool(input[0].reshape((self.bs, -1, self.path_size, self.path_size))),
+                    target
+                )
+                loss2 = torch.nn.functional.binary_cross_entropy_with_logits(
+                    self.max_pool(input[1].reshape((self.bs, -1, self.path_size, self.path_size))),
+                    target
+                )
+                loss = loss1 + 0.33*loss2
+            elif len(input) == 4:
+                # RESNET3DVAE
+                loss = torch.nn.functional.binary_cross_entropy_with_logits(
+                    self.max_pool(input[0].reshape((self.bs, -1, self.path_size, self.path_size))),
+                    target
+                )
+        else:
+            loss = torch.nn.functional.binary_cross_entropy_with_logits(
+                self.max_pool(input.reshape((self.bs, -1, self.path_size, self.path_size))),
+                target
+            )
         return loss, loss.clone().cpu().detach().numpy().reshape((1))
